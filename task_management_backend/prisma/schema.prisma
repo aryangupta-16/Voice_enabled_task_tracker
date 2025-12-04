@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id               String    @id @default(uuid()) @db.Uuid
+  title            String    @db.VarChar(200)
+  description      String?   @db.Text
+  status           TaskStatus @default(TODO)
+  priority         Priority   @default(MEDIUM)
+  dueDate          DateTime?  @db.Timestamp
+  rawTranscript    String?   @db.Text
+  
+  // Relations
+  voiceParsingLogs VoiceParsingLog[]
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Indexes for performance
+  @@index([status, priority])
+  @@index([dueDate])
+  @@index([createdAt])
+}
+
+model VoiceParsingLog {
+  id               String    @id @default(uuid()) @db.Uuid
+  rawTranscript    String    @db.Text
+  parsedData       Json      // Stores parsed title, description, priority, dueDate, status
+  confidence       Float     @default(0.0) // Overall confidence score (0-1)
+  
+  // Relations
+  task             Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  taskId           String?   @db.Uuid
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Indexes
+  @@index([taskId])
+  @@index([createdAt])
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}

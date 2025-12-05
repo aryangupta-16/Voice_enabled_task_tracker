@@ -181,9 +181,9 @@ export default function HomePage() {
             <div className="flex items-center gap-2 sm:gap-3 animate-slideInLeft">
               <VoiceInputButton
                 isRecording={isRecording}
-                // isSupported={isVoiceSupported}
                 onStart={startRecording}
                 onStop={stopRecording}
+                isParsing={isParsingVoice}
               />
               <Button onClick={() => setShowTaskForm(true)} className="shadow-elevation">
                 ➕ Add Task

@@ -16,7 +16,7 @@ A full-stack task management application that allows users to create tasks by sp
 - PostgreSQL database (version 12 or higher)
 - npm or yarn package manager
 
-**Note:** This project does not require any external API keys. Voice recognition uses the browser's native Web Speech API, and voice parsing is handled by a custom regex-based parser on the backend.
+**Note:** You need an OpenAI API key for backend parsing. Voice recognition uses the browser's native Web Speech API for speech-to-text in the frontend; the resulting transcript is sent to the backend for LLM-based parsing.
 
 ### Installation Steps
 
@@ -146,16 +146,8 @@ No seed data or initial scripts are provided. The application starts with an emp
 - **Schema:** Tasks table with fields for title, description, status, priority, due date, and raw transcript
 
 ### AI Provider
-The application uses a custom-built natural language processing utility that relies on regex patterns and keyword matching rather than external AI services. This approach was chosen for:
-- No external API dependencies or costs
-- Predictable parsing behavior
-- Full control over parsing logic
-- Fast response times
-
-The parser extracts task details by:
-- Matching priority keywords (urgent, critical, high priority, etc.)
-- Parsing date patterns (relative like "tomorrow" or absolute like "Jan 15")
-- Identifying task titles from natural language structure
+- Frontend: Web Speech API converts audio to text locally.
+- Backend: LangChain `createAgent` with OpenAI plus date/priority tools parses transcripts into `title`, `description`, `priority`, and `dueDate`.
 
 ### Email Solution
 Email functionality is not implemented in this version. This was out of scope for the assignment requirements.
@@ -393,16 +385,7 @@ Returns the created task object with all fields populated.
 ### Key Design Decisions
 
 **Voice Parsing Approach:**
-I chose to implement a custom regex-based parser instead of using an external LLM service like OpenAI. This decision was made because:
-- No external API dependencies means no API keys needed and no costs
-- Predictable behavior makes testing easier
-- Faster response times without network calls
-- Full control over parsing logic allows for easy customization
-
-The parser uses pattern matching for:
-- Priority detection through keyword matching (urgent, critical, high priority, etc.)
-- Date parsing using regex patterns for both relative ("tomorrow", "next Monday") and absolute ("Jan 15", "2025-01-15") dates
-- Title extraction by identifying the main task description in natural language
+Client STT (Web Speech API). Backend LangChain `createAgent` (OpenAI + date/priority tools) extracts structured fields. Only transcripts are sent; no audio.
 
 **Database Schema:**
 Tasks are stored with all fields including an optional `rawTranscript` field to preserve the original voice input. This allows for debugging parsing issues and provides transparency to users. A separate `VoiceParsingLog` table stores parsing attempts with confidence scores for analytics.
@@ -411,93 +394,29 @@ Tasks are stored with all fields including an optional `rawTranscript` field to 
 The frontend uses a modular component structure with custom hooks for business logic. I avoided Redux in favor of React hooks and context to keep the codebase simpler and more maintainable for a single-user application.
 
 **Voice Recognition:**
-The application uses the browser's native Web Speech API rather than a third-party service. This eliminates the need for API keys and works offline in supported browsers. The trade-off is browser compatibility, but Chrome, Edge, and Safari all support it well.
+Client-only STT; no audio streaming. Lower bandwidth and simpler infra. Chrome/Edge/Safari supported; Firefox limited.
 
 **State Management:**
 State is managed locally using React hooks and custom hooks. No global state management library was used since the application is single-user and doesn't require complex state synchronization.
 
 ### Assumptions
+- Email: out of scope.
+- Auth: single-user; no auth/multi-user.
+- Browser: Chrome/Edge/Safari for Web Speech API; Firefox limited.
+- Parsing: LLM + tools normalize dates/priorities; ambiguous phrasing may fallback to defaults.
+- Transcript length: >=10 chars for usable context.
+- Timezone: defaults to UTC unless provided.
 
-**Email Functionality:**
-I assumed email sending and receiving was out of scope for this assignment. The requirements focused on task management and voice input, so email notifications were not implemented.
-
-**User Authentication:**
-The application is designed as a single-user system. No authentication or multi-user support was implemented, as this was explicitly listed as out of scope.
-
-**Browser Support:**
-I assumed users would use modern browsers (Chrome, Edge, or Safari) for voice input functionality. Firefox has limited Web Speech API support, and Internet Explorer is not supported.
-
-**Date Parsing:**
-The parser assumes users will speak dates in common formats. Complex date expressions or ambiguous references might not parse correctly. The system defaults to sensible values when parsing fails.
-
-**Priority Detection:**
-Priority is detected through keyword matching. If no priority keywords are found, the system defaults to MEDIUM priority. This assumes users will explicitly mention priority when it matters.
-
-**Voice Input Length:**
-The system assumes voice transcripts will be at least 10 characters long. Very short inputs might not provide enough context for meaningful parsing.
-
-**Timezone Handling:**
-Dates are parsed in UTC by default unless a timezone is specified. This assumes the backend and frontend can coordinate timezone handling appropriately.
+**Why no frontend LLM or direct audio streaming:**
+- In-browser LLMs are too heavy for perf/size; backend parsing is lighter to evolve.
+- Audio streaming increases bandwidth and media handling; transcripts are small and stateless.
+- Hosted STT (Whisper/OpenAI) per request adds cost/latency; Web Speech API is free and on-device.
 
 ## AI Tools Usage
+- Copilot: boilerplate React/TypeScript and API helpers.
+- Cursor: completions/refactors; TypeScript typings.
+- ChatGPT/Claude: LangChain agent prompt/tool design, component structure, parsing/debugging.
 
-### Tools Used
-
-I used several AI tools during development:
-
-**GitHub Copilot:**
-Used extensively for boilerplate code generation, especially for React components and TypeScript interfaces. Copilot helped speed up initial component structure and common patterns like form handling and API calls.
-
-**Cursor IDE:**
-The intelligent code completion and refactoring suggestions in Cursor were helpful for maintaining consistent code style and catching potential issues early. It also assisted with TypeScript type definitions and error handling patterns.
-
-**Claude/ChatGPT:**
-Used for architectural decisions and problem-solving when stuck on specific implementation challenges. These tools helped with:
-- Designing the voice parsing algorithm
-- Structuring the component hierarchy
-- Planning the database schema
-- Debugging complex date parsing logic
-
-### What They Helped With
-
-**Boilerplate Generation:**
-Copilot was particularly useful for generating repetitive code like API service functions, TypeScript interfaces, and React component structures. This saved significant time on initial setup.
-
-**Debugging:**
-When encountering issues with date parsing or voice recognition, I used ChatGPT to brainstorm solutions and understand edge cases I might have missed.
-
-**Design Decisions:**
-Claude helped me think through the trade-offs between using an LLM for parsing versus building a custom parser. The discussion helped clarify that a regex-based approach would be sufficient for the assignment scope.
-
-**Code Review:**
-I used AI tools to review my code structure and suggest improvements for modularity and maintainability. This helped ensure the codebase followed best practices.
-
-### Notable Prompts and Approaches
-
-**Voice Parsing Algorithm:**
-I asked ChatGPT to help design a regex-based parser that could handle various date formats and priority keywords. The conversation helped me identify patterns I might have missed, like handling "by Friday" versus "before Friday".
-
-**Component Architecture:**
-I used Claude to discuss the best way to structure React components for the task management features. This led to the decision to separate UI components from business logic using custom hooks.
-
-**Error Handling:**
-I prompted Copilot to generate consistent error handling patterns across the codebase, ensuring all API calls had proper error handling and user feedback.
-
-### What I Learned and Changed
-
-**Initial Approach:**
-I initially considered using OpenAI's API for voice parsing, thinking it would provide better accuracy. However, after discussing with AI tools and considering the requirements, I realized a custom parser would be more appropriate.
-
-**Date Parsing:**
-Early versions of the date parser were too strict. Through testing and AI-assisted debugging, I learned to handle more edge cases and provide better fallbacks when parsing fails.
-
-**Component Structure:**
-Initially, I had business logic mixed with UI components. AI tools helped me refactor to a cleaner separation using custom hooks, making the code more testable and maintainable.
-
-**Type Safety:**
-Working with TypeScript and AI tools helped me understand the importance of strict typing. The tools suggested better type definitions that caught bugs early in development.
-
-**User Experience:**
-AI tools helped me think through the user flow, especially around voice input. The suggestion to show a loading state while parsing and allow users to review parsed data before saving significantly improved the user experience.
-
-Overall, AI tools were most valuable for speeding up development, catching potential issues early, and helping me think through architectural decisions. They didn't replace critical thinking but acted as helpful assistants throughout the development process.
+### What Changed
+- Moved from regex-only parsing to OpenAI-backed LangChain agent with date/priority tools.
+- Tuned prompts/tools for better defaults and clearer edge-case handling.

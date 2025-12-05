@@ -1,13 +1,7 @@
-/**
- * Utility Functions
- * Helper functions for formatting, validation, etc.
- */
+
 
 import { Priority, TaskStatus } from '@/types';
 
-/**
- * Format date to readable string
- */
 export const formatDate = (dateString: string | null | undefined): string => {
   if (!dateString) return 'No date set';
   try {
@@ -24,9 +18,33 @@ export const formatDate = (dateString: string | null | undefined): string => {
   }
 };
 
-/**
- * Format time difference (e.g., "2 hours ago")
- */
+export const formatDateForInput = (dateString: string | null | undefined): string => {
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch {
+    return '';
+  }
+};
+
+export const parseDateFromInput = (inputValue: string): string | null => {
+  if (!inputValue) return null;
+  try {
+    const localDate = new Date(inputValue);
+    return localDate.toISOString();
+  } catch {
+    return null;
+  }
+};
+
+
 export const formatTimeAgo = (dateString: string): string => {
   const now = new Date();
   const date = new Date(dateString);
@@ -41,9 +59,6 @@ export const formatTimeAgo = (dateString: string): string => {
   return `${days}d ago`;
 };
 
-/**
- * Get priority color
- */
 export const getPriorityColor = (priority: Priority): string => {
   switch (priority) {
     case 'CRITICAL':
@@ -59,18 +74,12 @@ export const getPriorityColor = (priority: Priority): string => {
   }
 };
 
-/**
- * Get priority badge class
- */
 export const getPriorityBadgeClass = (priority: Priority): string => {
   const base =
     'inline-flex items-center justify-center px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide uppercase';
   return `${base} ${getPriorityColor(priority)}`;
 };
 
-/**
- * Get status color
- */
 export const getStatusColor = (status: TaskStatus): string => {
   switch (status) {
     case 'TODO':
@@ -84,9 +93,6 @@ export const getStatusColor = (status: TaskStatus): string => {
   }
 };
 
-/**
- * Get status label
- */
 export const getStatusLabel = (status: TaskStatus): string => {
   switch (status) {
     case 'TODO':
@@ -100,24 +106,15 @@ export const getStatusLabel = (status: TaskStatus): string => {
   }
 };
 
-/**
- * Get priority label
- */
 export const getPriorityLabel = (priority: Priority): string => {
   return priority.charAt(0) + priority.slice(1).toLowerCase();
 };
 
-/**
- * Check if date is overdue
- */
 export const isOverdue = (dueDate: string | null | undefined): boolean => {
   if (!dueDate) return false;
   return new Date(dueDate) < new Date();
 };
 
-/**
- * Check if date is today
- */
 export const isToday = (dueDate: string | null | undefined): boolean => {
   if (!dueDate) return false;
   const date = new Date(dueDate);
@@ -129,9 +126,6 @@ export const isToday = (dueDate: string | null | undefined): boolean => {
   );
 };
 
-/**
- * Check if date is tomorrow
- */
 export const isTomorrow = (dueDate: string | null | undefined): boolean => {
   if (!dueDate) return false;
   const date = new Date(dueDate);
@@ -143,9 +137,6 @@ export const isTomorrow = (dueDate: string | null | undefined): boolean => {
   );
 };
 
-/**
- * Get due date status text
- */
 export const getDueDateStatus = (dueDate: string | null | undefined): string => {
   if (!dueDate) return 'No due date';
   if (isOverdue(dueDate)) return 'Overdue';
@@ -154,32 +145,20 @@ export const getDueDateStatus = (dueDate: string | null | undefined): string => 
   return formatDate(dueDate);
 };
 
-/**
- * Truncate text
- */
 export const truncateText = (text: string, length: number = 100): string => {
   if (text.length <= length) return text;
   return text.substring(0, length) + '...';
 };
 
-/**
- * Validate email
- */
 export const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 };
 
-/**
- * Capitalize first letter
- */
 export const capitalize = (text: string): string => {
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
 
-/**
- * Generate color based on string (for avatars, etc.)
- */
 export const getColorFromString = (str: string): string => {
   const colors = [
     'bg-red-500',

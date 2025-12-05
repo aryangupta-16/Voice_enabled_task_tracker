@@ -22,7 +22,6 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
   disabled = false,
   isParsing = false,
 }) => {
-  // Detect support only on the client
   const [isSupported, setIsSupported] = useState<boolean>(false);
 
   useEffect(() => {
@@ -31,7 +30,6 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
     }
   }, []);
 
-  // Fallback when not supported
   if (!isSupported) {
     return (
       <button
@@ -52,7 +50,6 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
     );
   }
 
-  // Show loader when parsing (waiting for API response)
   if (isParsing) {
     return (
       <button
@@ -70,7 +67,6 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
     );
   }
 
-  // Main button when supported
   return (
     <button
       onClick={isRecording ? onStop : onStart}

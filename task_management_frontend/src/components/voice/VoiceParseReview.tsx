@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { VoiceParseResponse, Priority, TaskStatus } from '@/types';
 import { Button } from '@/components/common';
-import { getPriorityBadgeClass, formatDate } from '@/utils/helpers';
+import { getPriorityBadgeClass, formatDate, formatDateForInput, parseDateFromInput } from '@/utils/helpers';
 
 interface VoiceParseReviewProps {
   parseData: VoiceParseResponse;
@@ -114,15 +114,11 @@ export const VoiceParseReview: React.FC<VoiceParseReviewProps> = ({
           </label>
           <input
             type="datetime-local"
-            value={
-              editedData.parsed.dueDate
-                ? new Date(editedData.parsed.dueDate).toISOString().slice(0, 16)
-                : ''
-            }
+            value={formatDateForInput(editedData.parsed.dueDate)}
             onChange={(e) => {
               handleFieldChange(
                 'dueDate',
-                e.target.value ? new Date(e.target.value).toISOString() : null
+                parseDateFromInput(e.target.value)
               );
             }}
             className="w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-white/90 input-glow focus:outline-none focus:ring-2 focus:ring-blue-500"

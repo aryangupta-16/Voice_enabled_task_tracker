@@ -3,10 +3,8 @@
  * Core types and interfaces for the task management application
  */
 
-// Task Status Types
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
 
-// Priority Types
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 /**

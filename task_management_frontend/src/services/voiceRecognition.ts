@@ -59,7 +59,6 @@ export class VoiceRecognitionService {
         }
       }
     
-      // Send both transcripts
       onResult(finalTranscript.trim() || interimTranscript.trim(), finalTranscript.length > 0);
     };
     
@@ -114,5 +113,4 @@ export class VoiceRecognitionService {
   }
 }
 
-// Export singleton instance
 export const voiceRecognitionService = new VoiceRecognitionService();

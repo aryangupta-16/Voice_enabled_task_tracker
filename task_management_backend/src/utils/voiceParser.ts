@@ -1,12 +1,8 @@
-import OpenAI from "openai";
 import { z } from "zod";
 import * as chrono from "chrono-node";
 import { createAgent,tool } from "langchain";
 import { ChatOpenAI } from "@langchain/openai";
 
-// --------------------------------------------------
-// 1️⃣ Structured Output Schema
-// --------------------------------------------------
 const TaskSchema = z.object({
   title: z.string(),
   description: z.string().nullable(),
@@ -15,11 +11,6 @@ const TaskSchema = z.object({
   status: z.enum(["TODO", "in_progress", "done"]),
 });
 
-// --------------------------------------------------
-// 2️⃣ Tools (Date Parsing + Priority Detection)
-// --------------------------------------------------
-
-// Natural-language date parsing (using chrono)
 const parseDateTool = tool(
   ({ text }) => {
     const d = chrono.parseDate(text);
@@ -32,7 +23,6 @@ const parseDateTool = tool(
   }
 );
 
-// Detect priority
 const detectPriorityTool = tool(
   ({ text }) => {
     const t = text.toLowerCase();
@@ -49,17 +39,11 @@ const detectPriorityTool = tool(
   }
 );
 
-// --------------------------------------------------
-// 3️⃣ LLM Model
-// --------------------------------------------------
 const llmModel = new ChatOpenAI({
   model: "gpt-4.1",
   temperature: 0.2,
 });
 
-// --------------------------------------------------
-// 4️⃣ SYSTEM PROMPT
-// --------------------------------------------------
 const SYSTEM_PROMPT = `
 You are a highly accurate task parsing agent.
 
@@ -92,10 +76,6 @@ Transcript:
 {{transcript}}
 `;
 
-
-// --------------------------------------------------
-// 5️⃣ Create Agent (LangChain)
-// --------------------------------------------------
 const agent = createAgent({
   model: llmModel,
   tools: [parseDateTool, detectPriorityTool],
@@ -103,13 +83,10 @@ const agent = createAgent({
   responseFormat: TaskSchema,
 });
 
-// --------------------------------------------------
-// 6️⃣ PUBLIC FUNCTION — SAME NAME AS BEFORE
-// --------------------------------------------------
 export async function parseVoiceWithLLM(transcript: string) {
   const result = await agent.invoke({
     messages: [{ role: "user", content: transcript }],
   });
 
-  return result.structuredResponse; // Already JSON & validated by Zod
+  return result.structuredResponse; 
 }

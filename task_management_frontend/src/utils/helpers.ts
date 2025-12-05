@@ -28,7 +28,6 @@ export const formatDateForInput = (dateString: string | null | undefined): strin
   if (!dateString) return '';
   try {
     const date = new Date(dateString);
-    // Get local date components
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -44,9 +43,7 @@ export const formatDateForInput = (dateString: string | null | undefined): strin
 export const parseDateFromInput = (inputValue: string): string | null => {
   if (!inputValue) return null;
   try {
-    // datetime-local input is in local timezone, create date from it
     const localDate = new Date(inputValue);
-    // Return ISO string (UTC) for storage
     return localDate.toISOString();
   } catch {
     return null;

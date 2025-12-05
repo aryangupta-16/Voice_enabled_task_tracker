@@ -4,10 +4,9 @@ import { Priority, TaskStatus } from '@prisma/client';
 import { VoiceParseResponse, ParsedTaskData } from '../../types/voice.types';
 
 export async function parseTranscript(transcript: string, timezone?: string): Promise<VoiceParseResponse> {
-  // parseVoiceTranscript is synchronous, no await needed
+
   const parsingResult = await parseVoiceWithLLM(transcript);
 
-  // Save parsing log
   const parseLog = await prisma.voiceParsingLog.create({
     data: {
       rawTranscript: transcript,

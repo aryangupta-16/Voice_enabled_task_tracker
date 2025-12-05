@@ -67,7 +67,7 @@ You receive a natural language voice transcript.
 Your goal is to extract a clean, structured task object with the following fields:
 
 1. **title** – Short, action-oriented summary of the task.
-2. **description** – If possible, expand on the title and describe about the title in description. Use the transcript to generate a meaningful description. If no extra details are available, set to null.
+2. **description** – Write a clear explanation of what the task involves and what needs to be done, written as if you (the user) are describing the task yourself. Use first-person or direct language. Extract relevant details from the transcript. If no meaningful details are available beyond the title, set to null.
 3. **dueDate** – Use the date parsing tool to extract a due date in ISO 8601 format. If the tool cannot find a date, infer it from context or set to null.
 4. **priority** – Use the priority detection tool. If priority cannot be determined, infer the best guess from the transcript context.
 5. **status** – Look for status hints in the transcript (TODO, IN_PROGRESS, DONE). If none are present, default to "TODO".

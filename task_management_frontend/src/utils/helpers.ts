@@ -24,9 +24,36 @@ export const formatDate = (dateString: string | null | undefined): string => {
   }
 };
 
-/**
- * Format time difference (e.g., "2 hours ago")
- */
+export const formatDateForInput = (dateString: string | null | undefined): string => {
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    // Get local date components
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch {
+    return '';
+  }
+};
+
+export const parseDateFromInput = (inputValue: string): string | null => {
+  if (!inputValue) return null;
+  try {
+    // datetime-local input is in local timezone, create date from it
+    const localDate = new Date(inputValue);
+    // Return ISO string (UTC) for storage
+    return localDate.toISOString();
+  } catch {
+    return null;
+  }
+};
+
+
 export const formatTimeAgo = (dateString: string): string => {
   const now = new Date();
   const date = new Date(dateString);
@@ -41,9 +68,6 @@ export const formatTimeAgo = (dateString: string): string => {
   return `${days}d ago`;
 };
 
-/**
- * Get priority color
- */
 export const getPriorityColor = (priority: Priority): string => {
   switch (priority) {
     case 'CRITICAL':
